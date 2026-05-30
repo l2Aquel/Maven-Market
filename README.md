@@ -63,209 +63,175 @@ to provide a "Single Source of Truth" for retail operations and management. It a
 
 ## 6. SQL Logic & Insights
 
-Checking for Duplicate Values
-```sql
-select o.order_id,l.state,l.city,l.location,d.order_date,r.restaurant_name,di.category,di.dish_name,o.price,o.rating,o.rating_count,count(*) as occurance
-from fact_orders o
-join dim_location l on o.location_id = l.location_id
-join dim_date d on o.date_id = d.date_id
-join dim_dish di on o.food_id = di.dish_id
-join dim_restaurant r on o.restaurant_id = r.restaurant_id
-group by o.order_id,l.state,l.city,l.location,d.order_date,r.restaurant_name,di.category,di.dish_name,o.price,o.rating,o.rating_count
-having count(*) > 1;
-```
-Overall Table
-```sql
-select o.order_id,l.state,l.city,l.location,d.order_date,r.restaurant_name,di.category,di.dish_name,o.price,o.rating,o.rating_count
-from fact_orders o
-join dim_location l on o.location_id = l.location_id
-join dim_date d on o.date_id = d.date_id
-join dim_dish di on o.food_id = di.dish_id
-join dim_restaurant r on o.restaurant_id = r.restaurant_id
-```
-```sql
-SELECT marital_status,count(*) as patients_as_marital_status
-FROM [hospital_db].[dbo].[patients]
-GROUP BY marital_status;
-```
-KPI
-1. Total Orders
-```sql
-select count(order_id) as total_orders
-from fact_orders;
-```
-
-2. Total Revenue (inr millon)
-```sql
-select concat(round(sum(price)/1000000,2),' INR Million') as total_revenue
-from fact_orders;
-```
-
-3. Avg Dish Price
-```sql
-select concat(round(avg(price),2),' INR') as avg_dish_price
-from fact_orders;
-```
-
-4. Avg Rating
-```sql
-select round(avg(rating),2) as avg_rating
-from fact_orders;
-```
-
-Date Based Analysis
-1. Monthly Order Trends
+1. Write a query to retrieve the full names of all customers who live in Mexico.
 ```sql
 select 
-	extract (year from order_date) as year,
-	extract (month from order_date) as month,
-	to_char(order_date::DATE, 'Month') as month_name,
-	count(order_id) as total_orders
-from fact_orders f 
-join dim_date d on f.date_id = d.date_id
-group by year,month,month_name
-order by total_orders desc
+	concat(first_name,' ',last_name) as full_name,customer_country
+from customers
+where customer_country = 'Mexico'
 ```
 
-2. Quarterly Order Trends
-```sql
-select 
-	extract (year from order_date) as year,
-	extract (quarter from order_date) as quarter,
-	count(order_id) as total_orders
-from fact_orders f 
-join dim_date d on f.date_id = d.date_id
-group by year,quarter
-order by total_orders desc
-```
-
-3. Year Wise Growth
-```sql
-select 
-	extract (year from order_date) as year,
-	count(order_id) as total_orders
-from fact_orders f 
-join dim_date d on f.date_id = d.date_id
-group by year
-order by total_orders desc
-```
-
-4. Day of Week Patterns
-```sql
-select 
-	to_char(order_date, 'FMDay') as days_of_week,
-	count(order_id) as total_orders
-from fact_orders f 
-join dim_date d on f.date_id = d.date_id
-group by days_of_week
-order by total_orders desc
-```
-
-Location Based Analysis
-1. Top 10 Cities by Order Volume
-```sql
-select 
-	city,
-	count(order_id) as total_volume
-from fact_orders f
-join dim_location l on f.location_id = l.location_id
-group by city
-order by total_volume desc
-limit 10;
-```
-
-2. Revenue Contribution by States
-```sql
-select 
-	state,
-	sum(price) as revenue_by_state
-from fact_orders f
-join dim_location l on f.location_id = l.location_id
-group by state
-order by revenue_by_state desc;
-```
-
-Food Performance
-1. Top 10 Resturants by Orders
-```sql
-select 
-	restaurant_name,
-	count(order_id) as total_orders
-from fact_orders f
-join dim_restaurant r on f.restaurant_id = r.restaurant_id
-group by restaurant_name
-order by total_orders desc
-limit 10;
-```
-
-2. Top Categories
-```sql
-select 
-	category,
-	count(order_id) as total_orders
-from fact_orders f
-join dim_dish di on f.food_id = di.dish_id
-group by category
-order by total_orders desc
-limit 10;
-```
-
-3. Most Ordered Dishes
-```sql
-select 
-	dish_name,
-	count(order_id) as total_orders
-from fact_orders f
-join dim_dish di on f.food_id = di.dish_id
-group by dish_name
-order by total_orders desc
-limit 10;
-```
-
-4. Cuisine Performance
-```sql
-select 
-	category,
-	count(order_id) as total_orders,
-	round(avg(rating),2) as avg_rating
-from fact_orders f
-join dim_dish di on f.food_id = di.dish_id
-group by category
-order by total_orders desc;
-```
-
-5. Total Orders by Price Range
+2. How many stores does Maven Market have in each country?
 ```sql
 select
-	case
-		when price < 100 then 'Under 100'
-		when price between 100 and 199 then '100 - 199'
-		when price between 200 and 299 then '200 - 299'
-		when price between 300 and 399 then '300 - 399'
-		when price between 400 and 499 then '400 - 499'
-		else 'Over 500'
-	end as price_range,
-	count(order_id) as total_orders
-from fact_orders
-group by price_range
-order by total_orders desc;
+	store_country,count(*) as no_of_stores
+from stores 
+group by store_country
 ```
 
-6. Rating Count Distribution
+3. List all product names that are both low fat and recyclable.
 ```sql
 select
-	case
-		when price < 100 then 'Under 100'
-		when price between 100 and 199 then '100 - 199'
-		when price between 200 and 299 then '200 - 299'
-		when price between 300 and 399 then '300 - 399'
-		when price between 400 and 499 then '400 - 499'
-		else 'Over 500'
-	end as price_range,
-	count(order_id) as total_orders
-from fact_orders
-group by price_range
-order by total_orders desc;
+	product_name,low_fat,recyclable
+from products
+where low_fat = 1 and recyclable = 1
+```
+
+4. Show all unique sales_region names available in the Regions table
+```sql
+select 
+	distinct sales_region
+from regions
+```
+
+5. Retrieve all columns from the Transactions table for a specific customer (customer_id = 3449)
+```sql
+select 
+	*
+from transactions
+where customer_id = 3449
+```
+
+6. calculate the total revenue generated by each product_brand
+```sql
+select
+	product_brand,
+	sum(quantity * product_retail_price) as total
+from transactions t
+join products p on t.product_id = p.product_id 
+group by product_brand
+order by total desc
+```
+
+7. find the top 5 customers (name and total quantity purchased) who have bought the most items across all transactions.
+```sql
+select 
+	c.customer_id,first_name,last_name,
+	sum(quantity) as total_items_purchased
+from customers c
+join transactions t on c.customer_id = t.customer_id
+group by c.customer_id,first_name,last_name
+order by total_items_purchased desc
+limit 5; 
+```
+
+8. Join Transactions, Stores, and Regions to find the total quantity of items sold in the 'North West' sales region.
+```sql
+select
+	sales_region,
+	sum(quantity) as total_quantity
+from transactions t 
+join stores s on t.store_id = s.store_id
+join regions r on s.region_id = r.region_id
+where sales_region = 'North West'
+group by sales_region;
+```
+
+9. Count the total number of returns for each product_id, but only include products that have been returned more than 5 times.
+```sql
+SELECT
+	r.product_id, p.product_name,
+	count(*) as times_returned
+FROM returns r
+join products p on r.product_id = p.product_id
+group by r.product_id, p.product_name
+having count(*) > 5
+order by times_returned desc
+```
+
+10. Calculate the Total Profit (Total Revenue - Total Cost) for every month in 1998.
+```sql
+select
+	extract (month from transaction_date) as month_number,
+	to_char(date,'Month') as month_name,
+	ROUND(SUM(quantity * product_retail_price), 2) as total_revenue,
+    ROUND(SUM(quantity * product_cost), 2) as total_cost,
+    ROUND(SUM(quantity * (product_retail_price - product_cost)), 2) AS total_profit
+from products p
+join transactions t on p.product_id = t.product_id
+join calender c on t.transaction_date = c.date
+where extract (year from transaction_date) = 1998
+group by month_number,month_name
+order by month_number
+```
+
+11. For every product, calculate its Return Rate. Formula: (Total Quantity Returned / Total Quantity Sold) * 100.
+```sql
+SELECT
+	r.product_id,
+	sum(t.quantity) as total_sales,
+	sum(r.quantity) as total_returns,
+	round(((sum(r.quantity) / sum(t.quantity))*100),2) as return_rate
+FROM returns r
+join transactions t on r.product_id = t.product_id
+group by r.product_id
+order by return_rate desc
+```
+
+12. . Count how many customers fall into each category of income level order by income level low to high.
+```sql
+SELECT 
+	yearly_income,
+	count(*) as no_of_customers
+FROM customers
+group by yearly_income
+order by 
+	case yearly_income
+		when '$10K - $30K' then 1
+		when '$30K - $50K' then 2
+		when '$50K - $70K' then 3
+		when '$70K - $90K' then 4
+		when '$90K - $110K' then 5
+		when '$110K - $130K' then 6
+		when '$130K - $150K' then 7
+		when '$150K +' then 8 
+	end
+```
+
+13. Rank the sales_district within each sales_region based on their total sales quantity using a Window Function
+```sql
+select
+	sales_region,
+	sales_district,
+	sum(quantity) as total_quantity,
+	row_number() over(partition by sales_region order by sum(quantity) desc) as rn
+from transactions t
+join stores s on t.store_id = s.store_id
+join regions r on s.region_id = r.region_id
+group by sales_region,sales_district
+```
+
+14. Find customers who made a purchase in 1997 but have zero transactions recorded in 1998
+```sql
+SELECT 
+    c.customer_id, 
+    c.first_name, 
+    c.last_name,
+    c.customer_city,
+    c.customer_country
+FROM customers c
+WHERE 
+    c.customer_id IN (
+        SELECT customer_id 
+        FROM Transactions 
+        WHERE transaction_date BETWEEN '1997-01-01' AND '1997-12-31'
+    )
+    AND c.customer_id NOT IN (
+        SELECT customer_id 
+        FROM Transactions 
+        WHERE transaction_date BETWEEN '1998-01-01' AND '1998-12-31'
+    )
+ORDER BY c.customer_id;
 ```
 
 ## 7. Screenshots / Demos
