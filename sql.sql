@@ -4,7 +4,7 @@ SELECT
 FROM transactions t
 JOIN products p ON t.product_id = p.product_id
 
---2. Multi-Dimensional Customer Segmentation Analysis: Write a series of queries that aggregate total revenue and order frequency across Gender, Marital Status, Occupation, and Education Level.
+--2. Multi-Dimensional Customer Segmentation Analysis: Write a series of queries that aggregate total revenue across Gender, Marital Status, Occupation, and Education Level.
 
 --country
 SELECT 
@@ -94,7 +94,7 @@ SELECT
 FROM customers c
 LEFT JOIN transactions t ON c.customer_id = t.customer_id
 WHERE t.customer_id is NULL
-ORDER BY full_name
+ORDER BY full_name;
 
 SELECT 
 	concat(first_name,' ',last_name) as full_name 
