@@ -71,8 +71,7 @@ FROM transactions t
 JOIN products p ON t.product_id = p.product_id;
 ```
 
-2. Multi-Dimensional Customer Segmentation Analysis: Write a series of queries that aggregate total revenue across Gender, Marital Status, Occupation, and Education Level.
-country
+2. Multi-Dimensional Customer Segmentation Analysis: Write a series of queries that aggregate total revenue across Country, Gender, Marital Status, Occupation, and Education Level.
 ```sql
 SELECT 
 	customer_country,
@@ -84,7 +83,6 @@ GROUP BY customer_country
 ORDER BY revenue DESC;
 ```
 
-gender
 ```sql
 SELECT 
 	gender,
@@ -96,7 +94,6 @@ GROUP BY gender
 ORDER BY revenue DESC;
 ```
 
-marital_status
 ```sql
 SELECT 
 	marital_status,
@@ -108,7 +105,6 @@ GROUP BY marital_status
 ORDER BY revenue DESC;
 ```
 
-occupation
 ```sql
 SELECT 
 	occupation,
@@ -120,7 +116,6 @@ GROUP BY occupation
 ORDER BY revenue DESC;
 ```
 
-education
 ```sql
 SELECT 
 	education,
